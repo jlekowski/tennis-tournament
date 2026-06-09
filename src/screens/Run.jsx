@@ -5,6 +5,7 @@
 import React from "react";
 import { Compass } from "../engine/compass";
 import { Icon, Seed, SubPill, Sheet, Stepper, subMeta, displayName } from "../components/ui";
+import { setsForScoring } from "../scoring";
 
 function resolveSide(draw, feeder, labelStyle) {
   const C = Compass;
@@ -208,9 +209,27 @@ function RankRow({ match, draw }) {
 }
 
 // ---- STANDINGS ----
+const EMPTY_STAT = { matchesWon: 0, matchesLost: 0, setsWon: 0, setsLost: 0, gamesWon: 0, gamesLost: 0 };
+
+function StatLine({ st, anyGames }) {
+  return (
+    <div className="ace-num muted" style={{ fontSize: "calc(11.5px * var(--s))", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+      {st.matchesWon}–{st.matchesLost}<span className="faint"> W-L</span>
+      {anyGames && (
+        <React.Fragment>
+          <span className="faint"> · </span>{st.setsWon}–{st.setsLost}<span className="faint"> sets</span>
+          <span className="faint"> · </span>{st.gamesWon}–{st.gamesLost}<span className="faint"> games</span>
+        </React.Fragment>
+      )}
+    </div>
+  );
+}
+
 function StandingsView({ draw }) {
   const C = Compass;
   const placed = C.standings(draw);
+  const stats = C.playerStats(draw);
+  const anyGames = Object.values(stats).some((s) => s.gamesWon + s.gamesLost > 0);
   const n = draw.players.length;
   const rows = [];
   for (let r = 1; r <= n; r++) {
@@ -226,12 +245,17 @@ function StandingsView({ draw }) {
         {rows.map(({ rank, player }) => {
           const top3 = rank <= 3 && player;
           return (
-            <div key={rank} className="ace-card row center gap12" style={{ padding: "12px 14px", borderColor: rank === 1 && player ? "var(--accent)" : "var(--line)", background: rank === 1 && player ? "var(--accent-soft)" : "var(--surface)" }}>
+            <div key={rank} className="ace-card row center gap12" style={{ padding: "10px 14px", borderColor: rank === 1 && player ? "var(--accent)" : "var(--line)", background: rank === 1 && player ? "var(--accent-soft)" : "var(--surface)" }}>
               <span className="ace-medal" style={{ width: 30, textAlign: "center", fontSize: "calc(19px * var(--s))", color: top3 ? medalColor(rank) : "var(--faint)" }}>{rank}</span>
               {player ? (
                 <React.Fragment>
-                  <span className="grow" style={{ fontWeight: 800, fontSize: "calc(16px * var(--s))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{displayName(player)}</span>
-                  {rank === 1 && <Icon name="star" size={20} fill style={{ color: "var(--accent)" }} />}
+                  <div className="grow col" style={{ minWidth: 0, gap: 2 }}>
+                    <div className="row center gap8" style={{ minWidth: 0 }}>
+                      <span style={{ fontWeight: 800, fontSize: "calc(16px * var(--s))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>{displayName(player)}</span>
+                      {rank === 1 && <Icon name="star" size={18} fill style={{ color: "var(--accent)", flex: "none" }} />}
+                    </div>
+                    <StatLine st={stats[player.id] || EMPTY_STAT} anyGames={anyGames} />
+                  </div>
                   <Seed n={player.seed} />
                 </React.Fragment>
               ) : (
@@ -254,8 +278,8 @@ function ResultSheet({ draw, matchId, scoring, labelStyle, onConfirm, onUndo, on
   const pA = a.player, pB = b.player;
   const existing = match.winner !== undefined && !match.autoBye;
 
-  const nSets = scoring === "bo3" ? 3 : 1;
-  const usesScore = scoring !== "quick";
+  const nSets = setsForScoring(scoring);
+  const usesScore = nSets > 0;
   const [winner, setWinner] = React.useState(existing ? match.winner : null);
   const [ret, setRet] = React.useState(existing && match.score && match.score.ret || false);
   // sets stored as [gamesA, gamesB] per set (oriented to competitor A/B)
@@ -307,11 +331,11 @@ function ResultSheet({ draw, matchId, scoring, labelStyle, onConfirm, onUndo, on
 
       {usesScore && (
         <div style={{ marginTop: 18 }}>
-          <div className="ace-eyebrow" style={{ marginBottom: 10 }}>Games {scoring === "bo3" ? "(per set)" : ""}</div>
+          <div className="ace-eyebrow" style={{ marginBottom: 10 }}>Games {nSets > 1 ? "(per set)" : ""}</div>
           <div className="col gap10">
             {sets.slice(0, nSets).map((s, i) => (
               <div key={i} className="row center between" style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 13, padding: "8px 12px" }}>
-                <span className="ace-num muted" style={{ width: 46, fontSize: "calc(12px * var(--s))" }}>{scoring === "bo3" ? "SET " + (i + 1) : "GAMES"}</span>
+                <span className="ace-num muted" style={{ width: 46, fontSize: "calc(12px * var(--s))" }}>{nSets > 1 ? "SET " + (i + 1) : "GAMES"}</span>
                 <div className="row center gap10">
                   <div className="col center" style={{ gap: 2 }}>
                     <Stepper value={s[0]} onChange={(v) => { const ns = sets.slice(); ns[i] = [v, s[1]]; setSets(ns); }} max={20} />

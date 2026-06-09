@@ -254,6 +254,32 @@ function isComplete(draw) {
   return Object.keys(draw.placements).length >= draw.players.length;
 }
 
+// per-player tallies across all real (non-bye) matches.
+// Returns { [playerId]: { matchesWon, matchesLost, setsWon, setsLost, gamesWon, gamesLost } }.
+// score.sets are stored as [winnerGames, loserGames] per set.
+function playerStats(draw) {
+  const stats = {};
+  const ensure = (id) => (stats[id] = stats[id] || {
+    matchesWon: 0, matchesLost: 0, setsWon: 0, setsLost: 0, gamesWon: 0, gamesLost: 0,
+  });
+  for (const id of draw.matchOrder) {
+    const m = draw.matches[id];
+    if (m.winner === undefined || m.autoBye) continue;
+    if (m.winner == null || m.loser == null) continue;
+    const w = ensure(m.winner), l = ensure(m.loser);
+    w.matchesWon++; l.matchesLost++;
+    const sets = (m.score && m.score.sets) || [];
+    for (const s of sets) {
+      const wg = s[0], lg = s[1];
+      w.gamesWon += wg; w.gamesLost += lg;
+      l.gamesWon += lg; l.gamesLost += wg;
+      if (wg > lg) { w.setsWon++; l.setsLost++; }
+      else if (lg > wg) { l.setsWon++; w.setsLost++; }
+    }
+  }
+  return stats;
+}
+
 // standings: array of {rank, playerId} for ranks that are filled by real players, sorted
 function standings(draw) {
   const out = [];
@@ -277,6 +303,7 @@ export const Compass = {
   feederLabel,
   playerName,
   standings,
+  playerStats,
   isComplete,
   SUBDRAW_NAMES,
   subDrawKey,

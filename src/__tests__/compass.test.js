@@ -137,6 +137,39 @@ describe("clearResult", () => {
   });
 });
 
+// ---- playerStats ----
+
+describe("playerStats", () => {
+  it("tallies matches, sets and games per player (winner-oriented scores)", () => {
+    const draw = Compass.generateDraw(makePlayers(8));
+    const m = Compass.readyMatches(draw)[0];
+    const va = Compass.feederValue(draw, m.a);
+    const vb = Compass.feederValue(draw, m.b);
+    // va wins 2 sets to 1: 6-4, 3-6, 6-2  (stored as [winnerGames, loserGames])
+    Compass.applyResult(draw, m.id, va, { sets: [[6, 4], [3, 6], [6, 2]] });
+
+    const stats = Compass.playerStats(draw);
+    expect(stats[va]).toMatchObject({ matchesWon: 1, matchesLost: 0, setsWon: 2, setsLost: 1, gamesWon: 15, gamesLost: 12 });
+    expect(stats[vb]).toMatchObject({ matchesWon: 0, matchesLost: 1, setsWon: 1, setsLost: 2, gamesWon: 12, gamesLost: 15 });
+  });
+
+  it("counts matches but no sets/games for tap-winner (no score) results", () => {
+    const draw = Compass.generateDraw(makePlayers(8));
+    const m = Compass.readyMatches(draw)[0];
+    const va = Compass.feederValue(draw, m.a);
+    Compass.applyResult(draw, m.id, va, null);
+    const stats = Compass.playerStats(draw);
+    expect(stats[va]).toMatchObject({ matchesWon: 1, setsWon: 0, gamesWon: 0, gamesLost: 0 });
+  });
+
+  it("ignores auto-resolved byes", () => {
+    const draw = Compass.generateDraw(makePlayers(12)); // top seeds get round-1 byes
+    const stats = Compass.playerStats(draw);
+    // no player has recorded a match yet — byes don't count as wins
+    expect(Object.values(stats).every((s) => s.matchesWon === 0 && s.matchesLost === 0)).toBe(true);
+  });
+});
+
 // ---- stress: every count 6–16 always completes with a valid ranking ----
 
 describe("compass draw integrity (random play-throughs)", () => {

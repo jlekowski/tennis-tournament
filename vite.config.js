@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 
 // Phone-first single-page app. No special config needed beyond JSX support.
 export default defineConfig({
+  base: "./",
   plugins: [react()],
   server: { host: true, port: 5173 },
 });

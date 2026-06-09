@@ -5,18 +5,12 @@
 import React from "react";
 import { Icon, Seg, displayName } from "../components/ui";
 import { uid } from "../utils";
+import { SCORING_OPTS } from "../scoring";
 
 const SAMPLE_NAMES = ["Novak", "Carlos", "Jannik", "Daniil", "Sascha", "Andrey",
   "Stefanos", "Holger", "Casper", "Taylor", "Grigor", "Hubert",
   "Frances", "Ben", "Karen", "Lorenzo"];
 const SAMPLE_LAST = ["D.", "A.", "S.", "M.", "Z.", "R.", "T.", "K.", "C.", "F.", "G.", "H.", "B.", "S.", "K.", "M."];
-
-const SCORING_OPTS = [
-  { value: "quick", label: "Quick", desc: "Just tap the winner — fastest courtside." },
-  { value: "set1", label: "1 Set", desc: "Single set, e.g. first to 6 (win by 2)." },
-  { value: "pro", label: "Pro Set", desc: "One long set — first to 8 or 9 games." },
-  { value: "bo3", label: "Best of 3", desc: "Three sets, enter each set's games." },
-];
 
 export function SetupScreen({ onBack, onStart }) {
   const [name, setName] = React.useState("");

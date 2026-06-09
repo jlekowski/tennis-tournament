@@ -40,7 +40,7 @@ function buildDemo() {
     C.applyResult(draw, m.id, w, { sets: [[6, g]] });
     guard++;
   }
-  return { id: "demo-" + uid(), name: "Tuesday Club Comp", type: "singles", scoring: "set1", players, draw, done: C.isComplete(draw), created: Date.now(), demo: true };
+  return { id: "demo-" + uid(), name: "Tuesday Club Comp", type: "singles", scoring: "s1", players, draw, done: C.isComplete(draw), created: Date.now(), demo: true };
 }
 
 function initialSaved() {

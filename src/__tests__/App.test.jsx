@@ -49,9 +49,11 @@ describe("App", () => {
     await user.click(screen.getByText("Draw"));
     expect(screen.getAllByText(/East/).length).toBeGreaterThan(0);
 
-    // Standings tab → final standings list
+    // Standings tab → final standings list with per-player W-L / sets / games
     await user.click(screen.getByText("Standings"));
     expect(screen.getByText(/Final standings/)).toBeInTheDocument();
+    expect(screen.getAllByText(/W-L/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/games/).length).toBeGreaterThan(0);
   });
 
   it("starts a new tournament from home and shows the setup screen", async () => {
@@ -61,5 +63,21 @@ describe("App", () => {
     await user.click(screen.getByText("New tournament"));
     expect(screen.getByText("Scoring")).toBeInTheDocument();
     expect(screen.getByText(/seeding order/)).toBeInTheDocument();
+  });
+
+  it("records up to three sets when the 3 Sets format is chosen", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByText("New tournament"));
+    await user.click(screen.getByText(/add 8 sample/i)); // fill 8 players
+    await user.click(screen.getByText("3 Sets")); // pick 3-set scoring
+    await user.click(screen.getByText("Generate draw"));
+
+    // Open the first ready match's result sheet → three set rows
+    await user.click(screen.getAllByText("Enter result")[0]);
+    expect(screen.getByText("SET 1")).toBeInTheDocument();
+    expect(screen.getByText("SET 2")).toBeInTheDocument();
+    expect(screen.getByText("SET 3")).toBeInTheDocument();
   });
 });
