@@ -285,6 +285,14 @@ input { font-family: inherit; }
 .muted { color: var(--muted); }
 .faint { color: var(--faint); }
 
+.ace-footer {
+  display: flex; justify-content: center; align-items: center; gap: 6px;
+  margin-top: 30px; padding-bottom: max(env(safe-area-inset-bottom, 0px), 10px);
+  font-size: calc(12px * var(--s)); font-weight: 600; color: var(--muted);
+}
+.ace-footer a { color: var(--muted); text-decoration: underline; text-underline-offset: 2px; }
+.ace-footer a:hover { color: var(--ink); }
+
 /* fade/slide in for screens (transform-only so animations stay cheap) */
 @keyframes ace-fade { from { transform: translateY(7px); } to { transform: none; } }
 .ace-enter { animation: ace-fade .28s ease both; }

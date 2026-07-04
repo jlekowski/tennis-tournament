@@ -49,7 +49,12 @@ export function HomeScreen({ saved, onNew, onResume, onDelete, onOpenSettings })
             </React.Fragment>
           )}
 
-          <div style={{ height: 30 }} />
+          <div className="ace-footer">
+            <span>Made by</span>
+            <a href="https://lekowski.dev" target="_blank" rel="noopener noreferrer">Jerzy Lekowski</a>
+            <span>·</span>
+            <a href="https://github.com/jlekowski/tennis-tournament" target="_blank" rel="noopener noreferrer">GitHub</a>
+          </div>
         </div>
       </div>
     </div>
